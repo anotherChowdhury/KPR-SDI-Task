@@ -1,9 +1,9 @@
 # Software Intern Test For Kaan Pete Roi
 
-### Run yarn/npm install
+### run yarn/npm install after cloning
 
-#### yarn test
+### yarn test
 
-### yarn build (transpiles typescript to javascript)
+### yarn build 
 
-### yarn start (runs the javascript code generated in dist)
+### yarn start (will create an output.csv file in dist directory)
