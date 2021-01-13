@@ -4,7 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import Graph from './graph'
 import readline from 'readline'
-import { dateFormatRegex, headers, readLocation, writeLocation } from './constants'
+import { dateFormatRegex, headers, readLocation, writeLocation } from './config'
 
 type nodeData = {
   id: string | number
@@ -14,6 +14,63 @@ type nodeData = {
 }
 
 const graph = new Graph()
+
+const csvLocation = path.resolve(__dirname, readLocation)
+
+const readOneLineFromCSV = readline.createInterface({
+  input: fs.createReadStream(csvLocation, { encoding: 'utf-8' })
+})
+readOneLineFromCSV.on('line', (line: string) => {
+  const [date, shift, id, name] = line.split(',')
+  if (dateFormatRegex.test(date)) putOnGraph({ date, shift, id, name })
+})
+
+readOneLineFromCSV.on('error', (err: Error) => {
+  console.log('Error while reading file.', err)
+})
+
+readOneLineFromCSV.on('close', () => {
+  writeToFile(graph.adjacencyList)
+})
+
+const writeToFile = (adjacencyList: adjacencyList): void => {
+  const location = path.resolve(__dirname, writeLocation)
+  const writeStream = fs.createWriteStream(location)
+
+  writeStream.write(`${headers} \r\n`)
+
+  const lines = getLinesToWrite(adjacencyList)
+
+  lines.forEach((line) => writeStream.write(line))
+
+  writeStream.end()
+
+  writeStream.on('finish', () => {
+    console.log('Done')
+  })
+
+  writeStream.on('error', (err: Error) => {
+    console.log(err)
+  })
+}
+
+const getLinesToWrite = (edgeList: adjacencyList): Array<string> => {
+  const volunteers = Object.keys(edgeList)
+  const lines: Array<string> = []
+  const visited: Set<string> = new Set()
+  for (let name of volunteers) {
+    const currentRelationsObject = edgeList[name]
+    visited.add(name)
+    Object.keys(currentRelationsObject).forEach((volunteer) => {
+      if (!visited.has(volunteer)) {
+        const line = `${name}, ${volunteer}, ${currentRelationsObject[volunteer]} \r\n`
+        lines.push(line)
+      }
+    })
+  }
+
+  return lines
+}
 
 const putOnGraph = (data: nodeData) => {
   const { id, name, shift, date } = data
@@ -32,48 +89,4 @@ const putOnGraph = (data: nodeData) => {
       graph.addEdge(vertex!.getName(), node.getName())
     }
   })
-}
-
-const csvLocation = path.resolve(__dirname, readLocation)
-
-const readOneLineFromCSV = readline.createInterface({
-  input: fs.createReadStream(csvLocation, { encoding: 'utf-8' })
-})
-readOneLineFromCSV.on('line', (line: string) => {
-  const [date, shift, id, name] = line.split(',')
-  if (dateFormatRegex.test(date)) putOnGraph({ date, shift, id, name })
-})
-
-readOneLineFromCSV.on('error', (err: Error) => {
-  console.log('Error while reading file.', err)
-})
-
-readOneLineFromCSV.on('close', () => {
-  const location = path.resolve(__dirname, writeLocation)
-  const writeStream = fs.createWriteStream(location)
-  writeStream.write(`${headers} \r\n`)
-  writeToCSV(graph.adjacencyList, writeStream)
-  writeStream.end()
-  writeStream
-    .on('finish', () => {
-      console.log('finish write stream, moving along')
-    })
-    .on('error', (err: Error) => {
-      console.log(err)
-    })
-})
-
-const writeToCSV = (edgeList: adjacencyList, writeStream: fs.WriteStream) => {
-  const keys = new Set(Object.keys(edgeList))
-  for (let key of keys) {
-    const currentKey = key
-    const currentVolunteerRelationsObject = edgeList[currentKey]
-    keys.delete(key)
-    Object.keys(currentVolunteerRelationsObject).forEach((volunteer) => {
-      if (keys.has(volunteer)) {
-        const line = `${key}, ${volunteer}, ${currentVolunteerRelationsObject[volunteer]} \r\n`
-        writeStream.write(line)
-      }
-    })
-  }
 }

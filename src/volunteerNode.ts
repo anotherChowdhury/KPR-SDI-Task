@@ -8,19 +8,23 @@ class VolunteerNode {
     this.shiftWithDates = new Set<string>().add(shiftWithDate)
   }
 
-  getName(): string {
+  public getName(): string {
     return this.name
   }
 
-  getId(): string | number {
+  public getId(): string | number {
     return this.id
   }
 
-  addShiftWithDate(shiftWithDate: string): void {
+  public getShiftsWithDate(): Set<string> {
+    return this.shiftWithDates
+  }
+
+  public addShiftWithDate(shiftWithDate: string): void {
     if (!this.shiftWithDates.has(shiftWithDate)) this.shiftWithDates.add(shiftWithDate)
   }
 
-  checkIfShiftWithDateExists(shiftWithDate: string): boolean {
+  public checkIfShiftWithDateExists(shiftWithDate: string): boolean {
     return this.shiftWithDates.has(shiftWithDate)
   }
 }
