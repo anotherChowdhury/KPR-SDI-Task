@@ -1,8 +1,8 @@
 # Software Intern Test For Kaan Pete Roi
 
-## Typescript has been used in this project
-
 ### Run yarn/npm install
+
+#### yarn test
 
 ### yarn build (transpiles typescript to javascript)
 
