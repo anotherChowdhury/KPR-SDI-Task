@@ -14,7 +14,7 @@
   },
   "scripts": {
     "start": "node dist/index.js",
-    "build": "npx tsc && cp -R src/data dist",
+    "build": "npx tsc",
     "test": "npx jest"
   }
 }

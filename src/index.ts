@@ -15,6 +15,7 @@ type nodeData = {
 
 const graph = new Graph()
 
+const location = path.resolve(__dirname, '..', 'data', 'volunteer_attendance_data.csv')
 const csvLocation = path.resolve(__dirname, readLocation)
 
 const readOneLineFromCSV = readline.createInterface({
